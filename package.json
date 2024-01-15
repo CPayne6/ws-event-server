@@ -1,0 +1,19 @@
+{
+  "name": "ws-event-server",
+  "version": "1.0.0",
+  "description": "A websocket framework to allow for custom event communication between client and server",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chris Payne",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/ws": "^8.5.10"
+  },
+  "dependencies": {
+    "http": "^0.0.1-security",
+    "ws": "^8.16.0"
+  }
+}
