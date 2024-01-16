@@ -4,13 +4,16 @@
   "description": "A websocket framework to allow for custom event communication between client and server",
   "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "Chris Payne",
   "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "@types/ws": "^8.5.10"
+    "@types/jest": "^29.5.11",
+    "@types/ws": "^8.5.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "http": "^0.0.1-security",

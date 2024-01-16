@@ -62,7 +62,6 @@ export class EventGroup<T extends string = string> {
     this.forEachMember((id, es) => (es !== ignore && id !== ignore) ? es.dispatch(event, data) : undefined)
   }
 
-
   close(code?: number, data?: string | Buffer) {
     this.forEachMember((id, es) => es.ws.close(code, data))
   }
