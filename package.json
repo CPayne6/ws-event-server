@@ -2,8 +2,8 @@
   "name": "ws-event-server",
   "version": "1.0.0",
   "description": "A websocket framework to allow for custom event communication between client and server",
-  "main": "src/index.js",
-  "types": "src/index.ts",
+  "main": "build/index.js",
+  "types": "build/index.ts",
   "scripts": {
     "test": "jest"
   },
