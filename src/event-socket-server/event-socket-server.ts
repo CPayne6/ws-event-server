@@ -1,7 +1,6 @@
-import { RawData, ServerOptions, WebSocketServer, WebSocket } from 'ws'
-import { IncomingHttpHeaders, IncomingMessage } from 'http'
-import { extractDispatch } from '../utils'
-import type { EventListener } from '../event.types'
+import { ServerOptions, WebSocketServer } from 'ws'
+import { IncomingMessage } from 'http'
+import type { Listener, EventMap } from '../event.types'
 import { EventSocket } from '../event-socket'
 
 // Old implementation
@@ -16,12 +15,10 @@ import { EventSocket } from '../event-socket'
 export interface EventSocketServerConfig extends ServerOptions {
 }
 
-export class EventSocketServer<T extends string = string> {
+export class EventSocketServer<T extends string = string, K extends EventMap<T> = any> {
   private wss: WebSocketServer
-  eventMap: Record<string, EventListener>
 
   constructor(config: EventSocketServerConfig, callback?: () => void) {
-    this.eventMap = {}
     const port = config.port ?? 8080
 
     this.wss = new WebSocketServer({
@@ -34,7 +31,10 @@ export class EventSocketServer<T extends string = string> {
     this.wss.on('headers', callback)
   }
 
-  onConnection(callback: (es: EventSocket<T>, req: IncomingMessage) => void) {
-    this.wss.on('connection', (ws, req) => callback(EventSocket.from(ws), req))
+  onConnection(callback: (es: EventSocket<T, K>, req: IncomingMessage) => void) {
+    this.wss.on('connection', (ws, req) => {
+      const es = EventSocket.from<T, K>(ws);
+      callback(es, req)
+    })
   }
 }

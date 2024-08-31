@@ -1,44 +1,44 @@
 import { ClientRequestArgs } from 'http'
 import { extractDispatch } from '../utils'
+import { EventMap, Listener } from '../event.types'
+import {EventListener} from '../event-listener'
 import { ClientOptions, WebSocket } from 'ws'
 
 /**
  * Wrapper for WebSocket with dispatch functionality
  */
-export class EventSocket<T extends string = string> {
+export class EventSocket<T extends string, K extends EventMap<T> = any> extends EventListener<T, K> {
   ws: WebSocket
+  id: string
 
-  constructor(ws: WebSocket) {
+  constructor(ws: WebSocket, listeners: Listener[] = []) {
+    super(listeners)
+    this.id = crypto.randomUUID()
     this.ws = ws
-  }
-
-  static new<T extends string = string>(address: string, options?: ClientOptions | ClientRequestArgs) {
-    const ws = new WebSocket(address, options)
-    return new EventSocket<T>(ws)
-  }
-
-  static from<T extends string = string>(ws: WebSocket) {
-    return new EventSocket<T>(ws)
-  }
-
-  /**
-   * Register a listener for a 'message' with an event type
-   * 
-   * @param eventName 
-   * @param callback 
-   */
-  onDispatch<K = any>(eventName: T, callback: (data: K) => void) {
-    this.ws.on('message', (rawData) => {
-      try {
-        const [event, data] = extractDispatch(rawData)
-        if (event === eventName) {
-          callback(data)
+    ws.on('message', (rawData) => {
+      const [event, data] = extractDispatch<T, K>(rawData)
+      for(const listener of this.listeners){
+        const { eventName, callback } = listener
+        try {
+          if (event === eventName) {
+            callback(data)
+          }
+        }
+        catch (err) {
+          console.error(err)
         }
       }
-      catch (err) {
-        console.error(err)
-      }
     })
+    this.listeners = []
+  }
+
+  static new<T extends string = string, K extends EventMap<T> = any>(address: string, options?: ClientOptions | ClientRequestArgs) {
+    const ws = new WebSocket(address, options)
+    return new EventSocket<T, K>(ws)
+  }
+
+  static from<T extends string = string, K extends EventMap<T> = any>(ws: WebSocket) {
+    return new EventSocket<T, K>(ws)
   }
 
   /**
@@ -46,7 +46,14 @@ export class EventSocket<T extends string = string> {
    * @param eventName 
    * @param data 
    */
-  dispatch(eventName: T, data?: any) {
+  dispatch(eventName: T, data?: K[T]) {
     this.ws.send(JSON.stringify([eventName, data]))
+  }
+
+  /**
+   * Terminate the socket
+   */
+  terminate() {
+    this.ws.terminate()
   }
 }

@@ -1,4 +1,5 @@
 import { EventSocket } from '../event-socket'
+import { EventMap, Listener } from '../event.types'
 
 type BufferLike =
   | string
@@ -9,56 +10,51 @@ type BufferLike =
   | Uint8Array
   | ArrayBuffer
 
-type MembersMap = Record<string, EventSocket>
-
-export class EventGroup<T extends string = string> {
-  private members: MembersMap
+export class EventGroup<T extends string = string, K extends EventMap<T> = any> {
+  private sockets: EventSocket<T, K>[]
   public readonly name: string
 
-  constructor(name: string) {
-    this.members = {}
+  constructor(name: string, sockets: EventSocket<T, K>[] = []) {
+    this.sockets = sockets
     this.name = name
   }
 
   forEachMember(f: (id: string, es: EventSocket<T>) => void) {
-    const membersList = Object.entries(this.members)
-    membersList.forEach(([id, es]) => f(id, es))
+    this.sockets.forEach((socket) => f(socket.id, socket))
   }
 
   static new<T extends string = string>(name: string) {
     return new EventGroup<T>(name)
   }
 
-  getMembers() {
-    return this.members
+  getSockets() {
+    return this.sockets
   }
 
-  getFirstMember(): [string, EventSocket] | undefined {
-    return Object.entries(this.members)[0]
-  }
-
-
-  getMember(id: string): EventSocket | undefined {
-    return this.members[id]
+  getMember(id: string): EventSocket<T, K> | undefined {
+    return this.sockets.find((s) => s.id === id)
   }
 
   count() {
-    return Object.keys(this.members).length
+    return this.sockets.length
   }
 
   removeMember(id: string) {
-    delete this.members[id]
+    const index = this.sockets.findIndex((s) => s.id === id)
+    if (index !== -1) {
+      this.sockets.splice(index, 1)
+    }
   }
 
-  addMember(id: string, es: EventSocket) {
-    if (this.members[id] !== undefined) {
+  addMember(es: EventSocket<T, K>) {
+    if (this.getMember(es.id) !== undefined) {
       throw new Error('Unable to add existing member')
     }
-    es.ws.on('close', (e: CloseEvent) => this.removeMember(id))
-    this.members[id] = es
+    es.ws.on('close', (e: CloseEvent) => this.removeMember(es.id))
+    this.sockets.push(es)
   }
 
-  dispatch(event: T, data: BufferLike, ignore?: EventSocket | string) {
+  dispatch(event: T, data: BufferLike, ignore?: EventSocket<T, K> | string) {
     this.forEachMember((id, es) => (es !== ignore && id !== ignore) ? es.dispatch(event, data) : undefined)
   }
 
@@ -67,7 +63,7 @@ export class EventGroup<T extends string = string> {
   }
 
   terminate() {
-    this.forEachMember((id, es) => es.ws.terminate())
+    this.forEachMember((id, es) => es.terminate())
   }
 
   pause() {

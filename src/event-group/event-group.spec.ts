@@ -42,12 +42,12 @@ describe('Testing EventGroup class', () => {
     eg.addMember('test', {
       dispatch: testDispatch,
       ws: new WebSocket(null),
-      onDispatch: () => { }
+      on: () => { }
     })
     eg.addMember('test2', {
       dispatch: test2Dispatch,
       ws: new WebSocket(null),
-      onDispatch: () => { }
+      on: () => { }
     })
 
     eg.dispatch(eventName, eventData)
