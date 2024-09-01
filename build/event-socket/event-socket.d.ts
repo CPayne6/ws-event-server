@@ -17,7 +17,7 @@ export declare class EventSocket<T extends string, K extends EventMap<T> = any> 
      * @param eventName
      * @param data
      */
-    dispatch(eventName: T, data?: K[T]): void;
+    dispatch<J extends T>(eventName: J, data?: K[J]): void;
     /**
      * Terminate the socket
      */

@@ -46,7 +46,7 @@ export class EventSocket<T extends string, K extends EventMap<T> = any> extends 
    * @param eventName 
    * @param data 
    */
-  dispatch(eventName: T, data?: K[T]) {
+  dispatch<J extends T>(eventName: J, data?: K[J]) {
     this.ws.send(JSON.stringify([eventName, data]))
   }
 

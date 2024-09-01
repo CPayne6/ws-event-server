@@ -54,7 +54,7 @@ export class EventGroup<T extends string = string, K extends EventMap<T> = any> 
     this.sockets.push(es)
   }
 
-  dispatch(event: T, data: BufferLike, ignore?: EventSocket<T, K> | string) {
+  dispatch<J extends T>(event: J, data?: K[J], ignore?: EventSocket<T, K> | string) {
     this.forEachMember((id, es) => (es !== ignore && id !== ignore) ? es.dispatch(event, data) : undefined)
   }
 

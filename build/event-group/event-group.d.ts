@@ -1,7 +1,6 @@
 /// <reference types="node" />
 import { EventSocket } from '../event-socket';
 import { EventMap } from '../event.types';
-type BufferLike = string | Buffer | DataView | number | ArrayBufferView | Uint8Array | ArrayBuffer;
 export declare class EventGroup<T extends string = string, K extends EventMap<T> = any> {
     private sockets;
     readonly name: string;
@@ -13,10 +12,9 @@ export declare class EventGroup<T extends string = string, K extends EventMap<T>
     count(): number;
     removeMember(id: string): void;
     addMember(es: EventSocket<T, K>): void;
-    dispatch(event: T, data: BufferLike, ignore?: EventSocket<T, K> | string): void;
+    dispatch<J extends T>(event: J, data?: K[J], ignore?: EventSocket<T, K> | string): void;
     close(code?: number, data?: string | Buffer): void;
     terminate(): void;
     pause(): void;
     resume(): void;
 }
-export {};
