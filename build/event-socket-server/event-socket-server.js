@@ -6,7 +6,6 @@ const event_socket_1 = require("../event-socket");
 class EventSocketServer {
     constructor(config, callback) {
         var _a;
-        this.eventMap = {};
         const port = (_a = config.port) !== null && _a !== void 0 ? _a : 8080;
         this.wss = new ws_1.WebSocketServer(Object.assign(Object.assign({}, config), { port }), callback);
     }
@@ -14,7 +13,10 @@ class EventSocketServer {
         this.wss.on('headers', callback);
     }
     onConnection(callback) {
-        this.wss.on('connection', (ws, req) => callback(event_socket_1.EventSocket.from(ws), req));
+        this.wss.on('connection', (ws, req) => {
+            const es = event_socket_1.EventSocket.from(ws);
+            callback(es, req);
+        });
     }
 }
 exports.EventSocketServer = EventSocketServer;

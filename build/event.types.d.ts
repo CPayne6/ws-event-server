@@ -1,2 +1,7 @@
-import { EventSocket } from './event-socket';
-export type EventListener<D = any> = (socket: EventSocket, id: string, data: D | undefined) => void;
+export type EventMap<T extends string> = {
+    [key in T]: any;
+};
+export interface Listener {
+    eventName: string;
+    callback: (data: any) => void;
+}

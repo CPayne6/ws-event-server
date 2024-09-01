@@ -21,12 +21,12 @@ describe('Testing EventGroup class', () => {
     it('initializes the group', () => {
         const eg = new event_group_1.EventGroup(name);
         expect(eg.name).toEqual(name);
-        expect(eg.getMembers()).toEqual({});
+        expect(eg.getSockets()).toEqual([]);
     });
     it('adds a new member', () => {
         const eg = new event_group_1.EventGroup(name);
-        eg.addMember('test', new event_socket_1.EventSocket(new ws_1.WebSocket(null)));
-        eg.addMember('test2', new event_socket_1.EventSocket(new ws_1.WebSocket(null)));
+        eg.addMember(new event_socket_1.EventSocket(new ws_1.WebSocket(null)));
+        eg.addMember(new event_socket_1.EventSocket(new ws_1.WebSocket(null)));
         expect(eg.count()).toEqual(2);
     });
     it('dispatches to all members', () => {
@@ -35,15 +35,31 @@ describe('Testing EventGroup class', () => {
         const eg = new event_group_1.EventGroup(name);
         const testDispatch = jest.fn();
         const test2Dispatch = jest.fn();
-        eg.addMember('test', {
+        eg.addMember({
+            id: 'test',
             dispatch: testDispatch,
             ws: new ws_1.WebSocket(null),
-            onDispatch: () => { }
+            on: () => { },
+            terminate: function () {
+                throw new Error('Function not implemented.');
+            },
+            listeners: [],
+            off: function (eventName) {
+                throw new Error('Function not implemented.');
+            }
         });
-        eg.addMember('test2', {
+        eg.addMember({
+            id: 'test2',
             dispatch: test2Dispatch,
             ws: new ws_1.WebSocket(null),
-            onDispatch: () => { }
+            on: () => { },
+            terminate: function () {
+                throw new Error('Function not implemented.');
+            },
+            listeners: [],
+            off: function (eventName) {
+                throw new Error('Function not implemented.');
+            }
         });
         eg.dispatch(eventName, eventData);
         expect(testDispatch).toHaveBeenCalledWith(eventName, eventData);

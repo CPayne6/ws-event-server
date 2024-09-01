@@ -2,38 +2,37 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventGroup = void 0;
 class EventGroup {
-    constructor(name) {
-        this.members = {};
+    constructor(name, sockets = []) {
+        this.sockets = sockets;
         this.name = name;
     }
     forEachMember(f) {
-        const membersList = Object.entries(this.members);
-        membersList.forEach(([id, es]) => f(id, es));
+        this.sockets.forEach((socket) => f(socket.id, socket));
     }
     static new(name) {
         return new EventGroup(name);
     }
-    getMembers() {
-        return this.members;
-    }
-    getFirstMember() {
-        return Object.entries(this.members)[0];
+    getSockets() {
+        return this.sockets;
     }
     getMember(id) {
-        return this.members[id];
+        return this.sockets.find((s) => s.id === id);
     }
     count() {
-        return Object.keys(this.members).length;
+        return this.sockets.length;
     }
     removeMember(id) {
-        delete this.members[id];
+        const index = this.sockets.findIndex((s) => s.id === id);
+        if (index !== -1) {
+            this.sockets.splice(index, 1);
+        }
     }
-    addMember(id, es) {
-        if (this.members[id] !== undefined) {
+    addMember(es) {
+        if (this.getMember(es.id) !== undefined) {
             throw new Error('Unable to add existing member');
         }
-        es.ws.on('close', (e) => this.removeMember(id));
-        this.members[id] = es;
+        es.ws.on('close', (e) => this.removeMember(es.id));
+        this.sockets.push(es);
     }
     dispatch(event, data, ignore) {
         this.forEachMember((id, es) => (es !== ignore && id !== ignore) ? es.dispatch(event, data) : undefined);
@@ -42,7 +41,7 @@ class EventGroup {
         this.forEachMember((id, es) => es.ws.close(code, data));
     }
     terminate() {
-        this.forEachMember((id, es) => es.ws.terminate());
+        this.forEachMember((id, es) => es.terminate());
     }
     pause() {
         this.forEachMember((id, es) => es.ws.pause());

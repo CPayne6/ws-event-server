@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "types": "build/index.ts",
   "scripts": {
+    "build": "tsc",
     "test": "jest"
   },
   "author": "Chris Payne",

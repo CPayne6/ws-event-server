@@ -11,7 +11,7 @@ function extractDispatch(rawData) {
         throw new Error('Unable to read data');
     }
     // Extract event type and data
-    const [event, data] = payload;
+    const { event, data } = payload;
     if (!event || !data) {
         throw new Error('Unable to parse event or data');
     }

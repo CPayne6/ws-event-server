@@ -22,13 +22,13 @@ describe('Testing EventGroup class', () => {
   it('initializes the group', () => {
     const eg = new EventGroup(name)
     expect(eg.name).toEqual(name)
-    expect(eg.getMembers()).toEqual({})
+    expect(eg.getSockets()).toEqual([])
   })
 
   it('adds a new member', () => {
     const eg = new EventGroup(name)
-    eg.addMember('test', new EventSocket(new WebSocket(null)))
-    eg.addMember('test2', new EventSocket(new WebSocket(null)))
+    eg.addMember(new EventSocket(new WebSocket(null)))
+    eg.addMember(new EventSocket(new WebSocket(null)))
 
     expect(eg.count()).toEqual(2)
   })
@@ -39,15 +39,31 @@ describe('Testing EventGroup class', () => {
     const eg = new EventGroup(name)
     const testDispatch = jest.fn()
     const test2Dispatch = jest.fn()
-    eg.addMember('test', {
+    eg.addMember({
+      id: 'test',
       dispatch: testDispatch,
       ws: new WebSocket(null),
-      on: () => { }
+      on: () => { },
+      terminate: function (): void {
+        throw new Error('Function not implemented.')
+      },
+      listeners: [],
+      off: function <J extends string>(eventName: J): void {
+        throw new Error('Function not implemented.')
+      }
     })
-    eg.addMember('test2', {
+    eg.addMember({
+      id: 'test2',
       dispatch: test2Dispatch,
       ws: new WebSocket(null),
-      on: () => { }
+      on: () => { },
+      terminate: function (): void {
+        throw new Error('Function not implemented.')
+      },
+      listeners: [],
+      off: function <J extends string>(eventName: J): void {
+        throw new Error('Function not implemented.')
+      }
     })
 
     eg.dispatch(eventName, eventData)
