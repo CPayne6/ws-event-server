@@ -1,8 +1,14 @@
 import { ClientRequestArgs } from 'http'
 import { extractDispatch } from '../utils'
 import { EventMap, Listener } from '../event.types'
-import {EventListener} from '../event-listener'
+import { EventListener } from '../event-listener'
 import { ClientOptions, WebSocket } from 'ws'
+
+interface EventSocketConfig {
+  ws: WebSocket;
+  listeners?: Listener[];
+  id: string;
+}
 
 /**
  * Wrapper for WebSocket with dispatch functionality
@@ -11,13 +17,13 @@ export class EventSocket<T extends string, K extends EventMap<T> = any> extends 
   ws: WebSocket
   id: string
 
-  constructor(ws: WebSocket, listeners: Listener[] = []) {
+  constructor({ ws, listeners = [], id }: EventSocketConfig) {
     super(listeners)
-    this.id = crypto.randomUUID()
+    this.id = id
     this.ws = ws
     ws.on('message', (rawData) => {
       const [event, data] = extractDispatch<T, K>(rawData)
-      for(const listener of this.listeners){
+      for (const listener of this.listeners) {
         const { eventName, callback } = listener
         try {
           if (event === eventName) {
@@ -29,16 +35,15 @@ export class EventSocket<T extends string, K extends EventMap<T> = any> extends 
         }
       }
     })
-    this.listeners = []
   }
 
-  static new<T extends string = string, K extends EventMap<T> = any>(address: string, options?: ClientOptions | ClientRequestArgs) {
+  static new<T extends string = string, K extends EventMap<T> = any>(id: string, address: string, options?: ClientOptions | ClientRequestArgs) {
     const ws = new WebSocket(address, options)
-    return new EventSocket<T, K>(ws)
+    return new EventSocket<T, K>({ ws, id })
   }
 
-  static from<T extends string = string, K extends EventMap<T> = any>(ws: WebSocket) {
-    return new EventSocket<T, K>(ws)
+  static from<T extends string = string, K extends EventMap<T> = any>(id: string, ws: WebSocket) {
+    return new EventSocket<T, K>({ ws, id })
   }
 
   /**

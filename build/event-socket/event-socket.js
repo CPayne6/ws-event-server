@@ -8,9 +8,9 @@ const ws_1 = require("ws");
  * Wrapper for WebSocket with dispatch functionality
  */
 class EventSocket extends event_listener_1.EventListener {
-    constructor(ws, listeners = []) {
+    constructor({ ws, listeners = [], id }) {
         super(listeners);
-        this.id = crypto.randomUUID();
+        this.id = id;
         this.ws = ws;
         ws.on('message', (rawData) => {
             const [event, data] = (0, utils_1.extractDispatch)(rawData);
@@ -26,14 +26,13 @@ class EventSocket extends event_listener_1.EventListener {
                 }
             }
         });
-        this.listeners = [];
     }
-    static new(address, options) {
+    static new(id, address, options) {
         const ws = new ws_1.WebSocket(address, options);
-        return new EventSocket(ws);
+        return new EventSocket({ ws, id });
     }
-    static from(ws) {
-        return new EventSocket(ws);
+    static from(id, ws) {
+        return new EventSocket({ ws, id });
     }
     /**
      * Format a dispatch and send as a 'message'

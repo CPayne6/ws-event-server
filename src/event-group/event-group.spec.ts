@@ -27,8 +27,8 @@ describe('Testing EventGroup class', () => {
 
   it('adds a new member', () => {
     const eg = new EventGroup(name)
-    eg.addMember(new EventSocket(new WebSocket(null)))
-    eg.addMember(new EventSocket(new WebSocket(null)))
+    eg.addMember(new EventSocket({ ws: new WebSocket(null), id: 'test1' }))
+    eg.addMember(new EventSocket({ ws: new WebSocket(null), id: 'test2' }))
 
     expect(eg.count()).toEqual(2)
   })

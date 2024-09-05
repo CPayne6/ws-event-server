@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws';
-import {EventSocket} from './'
+import { EventSocket } from './'
 
 type EventName = 'test' | 'test2'
 
@@ -10,8 +10,8 @@ interface EventMap {
 
 const ws = new WebSocket(null)
 
-const e = new EventSocket<EventName, EventMap>(ws)
+const e = new EventSocket<EventName, EventMap>({ ws, id: 'test-id' })
 
 e.on('test', (data) => {
- data
+  data
 })

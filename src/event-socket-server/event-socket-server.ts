@@ -18,16 +18,18 @@ interface ServerListener<T extends string = string, K extends EventMap<T> = any>
 }
 
 export interface EventSocketServerConfig extends ServerOptions {
+  extractId: (req: IncomingMessage) => Promise<string>
 }
 
 export class EventSocketServer<T extends string = string, K extends EventMap<T> = any> {
   listeners: ServerListener<T>[];
   clients: EventSocket<T, K>[];
   private wss: WebSocketServer;
+  extractId: (req: IncomingMessage) => Promise<string>
 
   constructor(config: EventSocketServerConfig, callback?: () => void) {
-    const port = config.port ?? 8080
-
+    const port = config.port ?? 8080;
+    this.extractId = config.extractId;
     this.listeners = [];
     this.clients = [];
     this.wss = new WebSocketServer({
@@ -41,8 +43,9 @@ export class EventSocketServer<T extends string = string, K extends EventMap<T> 
   }
 
   onConnection(callback: (es: EventSocket<T, K>, req: IncomingMessage) => void) {
-    this.wss.on('connection', (ws, req) => {
-      const es = EventSocket.from<T, K>(ws);
+    this.wss.on('connection', async (ws, req) => {
+      const id = await this.extractId(req);
+      const es = EventSocket.from<T, K>(id, ws);
       this.clients.push(es);
       this.listeners.forEach((listener) => {
         es.on(listener.eventName, (data) => listener.callback(es, data))

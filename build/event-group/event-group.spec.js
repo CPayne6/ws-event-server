@@ -25,8 +25,8 @@ describe('Testing EventGroup class', () => {
     });
     it('adds a new member', () => {
         const eg = new event_group_1.EventGroup(name);
-        eg.addMember(new event_socket_1.EventSocket(new ws_1.WebSocket(null)));
-        eg.addMember(new event_socket_1.EventSocket(new ws_1.WebSocket(null)));
+        eg.addMember(new event_socket_1.EventSocket({ ws: new ws_1.WebSocket(null), id: 'test1' }));
+        eg.addMember(new event_socket_1.EventSocket({ ws: new ws_1.WebSocket(null), id: 'test2' }));
         expect(eg.count()).toEqual(2);
     });
     it('dispatches to all members', () => {
