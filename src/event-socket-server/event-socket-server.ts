@@ -12,15 +12,24 @@ import { EventSocket } from '../event-socket'
 //   [WsEvent.JOIN]: messageHandlers.unhandled
 // }
 
+interface ServerListener<T extends string = string, K extends EventMap<T> = any> {
+  eventName: T;
+  callback: (es: EventSocket<T, K>, data: any) => void
+}
+
 export interface EventSocketServerConfig extends ServerOptions {
 }
 
 export class EventSocketServer<T extends string = string, K extends EventMap<T> = any> {
-  private wss: WebSocketServer
+  listeners: ServerListener<T>[];
+  clients: EventSocket<T, K>[];
+  private wss: WebSocketServer;
 
   constructor(config: EventSocketServerConfig, callback?: () => void) {
     const port = config.port ?? 8080
 
+    this.listeners = [];
+    this.clients = [];
     this.wss = new WebSocketServer({
       ...config,
       port
@@ -34,7 +43,23 @@ export class EventSocketServer<T extends string = string, K extends EventMap<T> 
   onConnection(callback: (es: EventSocket<T, K>, req: IncomingMessage) => void) {
     this.wss.on('connection', (ws, req) => {
       const es = EventSocket.from<T, K>(ws);
+      this.clients.push(es);
+      this.listeners.forEach((listener) => {
+        es.on(listener.eventName, (data) => listener.callback(es, data))
+      });
       callback(es, req)
+    });
+  }
+
+  on<J extends T>(eventName: J, callback: (es: EventSocket<T, K>, data: K[J]) => void) {
+    this.listeners.push({
+      eventName,
+      callback
     })
+  }
+
+  off(eventName: T) {
+    this.clients.forEach(es => es.off(eventName));
+    this.listeners = this.listeners.filter(listener => listener.eventName !== eventName);
   }
 }
